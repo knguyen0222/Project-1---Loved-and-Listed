@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #fff5f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+
+        .login-card { background: white; border-radius: 16px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+
+        h1 { color: #f472b6; font-size: 24px; margin-bottom: 8px; text-align: center; }
+        p { color: #aaa; font-size: 14px; text-align: center; margin-bottom: 32px; }
+
+        label { display: block; font-size: 13px; color: #888; margin-bottom: 4px; margin-top: 16px; }
+        input { width: 100%; padding: 10px 12px; border: 1px solid #fce7f3; border-radius: 6px; font-size: 14px; color: #444; }
+        input:focus { outline: none; border-color: #f9a8d4; }
+
+        .login-btn { width: 100%; background: #f9a8d4; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-size: 15px; margin-top: 24px; }
+        .login-btn:hover { background: #f472b6; }
+
+        .error { color: #e11d48; font-size: 13px; margin-top: 8px; text-align: center; }
+
+        .links { text-align: center; margin-top: 16px; font-size: 13px; color: #aaa; }
+        .links a { color: #f472b6; text-decoration: none; }
+
+        .divider { border: none; border-top: 1px solid #fce7f3; margin: 16px 0; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h1>👜 Loved & Listed</h1>
+        <p>Sign in to access your inventory</p>
+        <form method="post">
+            {% csrf_token %}
+            {% if form.errors %}
+                <p class="error">Incorrect username or password. Try again.</p>
+            {% endif %}
+            <label>Username</label>
+            <input type="text" name="username" autofocus>
+            <label>Password</label>
+            <input type="password" name="password">
+            <button type="submit" class="login-btn">Sign In</button>
+        </form>
+        <hr class="divider">
+        <div class="links">
+            Don't have an account? <a href="{% url 'signup' %}">Sign up</a>
+        </div>
+        <div class="links" style="margin-top: 8px;">
+            <a href="{% url 'home' %}">Browse without an account →</a>
+        </div>
+    </div>
+</body>
+</html>

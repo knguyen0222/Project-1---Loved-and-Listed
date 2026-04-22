@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Closet</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #fff5f8; }
+
+        nav { background: white; padding: 16px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #fce7f3; }
+        nav h1 { color: #f472b6; font-size: 22px; }
+        nav a { color: #f472b6; text-decoration: none; font-size: 14px; margin-left: 20px; }
+        nav a.active { color: #db2777; font-weight: 500; border-bottom: 2px solid #f472b6; padding-bottom: 2px; }
+
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 24px; }
+
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .top-bar h2 { color: #f472b6; font-size: 20px; }
+
+        .add-btn { background: #f9a8d4; color: white; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; text-decoration: none; }
+        .add-btn:hover { background: #f472b6; }
+
+        .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+        .filter-btn { background: white; color: #f472b6; border: 1px solid #f9a8d4; padding: 6px 16px; border-radius: 99px; text-decoration: none; font-size: 13px; }
+        .filter-btn:hover { background: #fdf2f8; }
+        .filter-btn.active { background: #f9a8d4; color: white; }
+
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+        th { background: #f9a8d4; color: white; padding: 12px 16px; text-align: left; font-size: 14px; }
+        td { padding: 12px 16px; border-bottom: 1px solid #fce7f3; font-size: 14px; color: #444; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fdf2f8; }
+
+        .action-link { color: #f472b6; text-decoration: none; font-size: 13px; }
+        .action-link:hover { text-decoration: underline; }
+
+        .badge { padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 500; }
+        .badge-keeping { background: #fce7f3; color: #db2777; }
+        .badge-listed { background: #fef3c7; color: #d97706; }
+        .badge-sold { background: #d1fae5; color: #059669; }
+
+        .thumb { cursor: pointer; transition: opacity 0.2s; }
+        .thumb:hover { opacity: 0.8; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { position: relative; background: white; border-radius: 16px; padding: 16px; max-width: 500px; width: 90%; }
+        .modal-box img { width: 100%; border-radius: 10px; }
+        .modal-close { position: absolute; top: 10px; right: 14px; font-size: 22px; cursor: pointer; color: #f472b6; font-weight: 500; background: white; border: none; border-radius: 99px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+        .modal-close:hover { background: #fce7f3; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <h1>👜 Loved & Listed</h1>
+        <div style="display: flex; align-items: center;">
+            <a href="{% url 'home' %}">Browse</a>
+            <a href="{% url 'closet' %}" class="active">My Closet</a>
+            <a href="{% url 'public_profile' request.user.username %}">My Shop</a>
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+            <div style="position: relative; margin-left: 20px;" id="profileMenu">
+                <button onclick="toggleMenu()" style="background: #fce7f3; border: none; color: #f472b6; font-size: 14px; cursor: pointer; padding: 6px 14px; border-radius: 99px;">
+                    👤 Profile ▾
+                </button>
+                <div id="dropdown" style="display: none; position: absolute; right: 0; top: 36px; background: white; border: 1px solid #fce7f3; border-radius: 10px; min-width: 160px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 100;">
+                    <a href="{% url 'edit_profile' %}" style="display: block; padding: 10px 16px; font-size: 14px; color: #f472b6; text-decoration: none;">✏️ Edit Profile</a>
+                    <div style="border-top: 1px solid #fce7f3;"></div>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" style="width: 100%; text-align: left; background: none; border: none; padding: 10px 16px; font-size: 14px; color: #f472b6; cursor: pointer;">🚪 Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        function toggleMenu() {
+            const dropdown = document.getElementById('dropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('profileMenu');
+            if (menu && !menu.contains(e.target)) {
+                document.getElementById('dropdown').style.display = 'none';
+            }
+        });
+    </script>
+
+    <div class="container">
+
+        <div class="top-bar">
+            <h2>My Items</h2>
+            <a href="{% url 'add_item' %}" class="add-btn">+ Add Item</a>
+        </div>
+
+        <div class="filter-bar">
+            <a href="{% url 'closet' %}" class="filter-btn {% if not selected %}active{% endif %}">All</a>
+            {% for value, label in categories %}
+            <a href="?category={{ value }}" class="filter-btn {% if selected == value %}active{% endif %}">{{ label }}</a>
+            {% endfor %}
+        </div>
+
+        <table>
+            <tr>
+                <th>Image</th>
+                <th>Item</th>
+                <th>Brand</th>
+                <th>Category</th>
+                <th>Condition</th>
+                <th>Price Paid</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            {% for item in items %}
+            <tr>
+                <td>
+                    {% if item.image %}
+                        <img src="{{ item.image.url }}" class="thumb" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;" onclick="openModal('{{ item.image.url }}')">
+                    {% else %}
+                        <div style="width: 80px; height: 80px; background: #fce7f3; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #f472b6; text-align: center; line-height: 1.3;">No<br>image</div>
+                    {% endif %}
+                </td>
+                <td>{{ item.item_name }}</td>
+                <td>{{ item.brand }}</td>
+                <td>{{ item.category }}</td>
+                <td>{{ item.condition }}</td>
+                <td>{% if item.purchase_price %}${{ item.purchase_price }}{% else %}—{% endif %}</td>
+                <td>
+                    <span class="badge badge-{{ item.status|lower }}">{{ item.status }}</span>
+                </td>
+                <td>
+                    <a href="{% url 'edit_item' item.pk %}" class="action-link">✏️ Edit</a> &nbsp;|&nbsp;
+                    <a href="{% url 'delete_item' item.pk %}" class="action-link">🗑️ Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+    </div>
+
+    <div class="modal-overlay" id="imageModal" onclick="closeModal()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()">✕</button>
+            <img id="modalImg" src="" alt="Item image">
+        </div>
+    </div>
+
+    <script>
+        function openModal(url) {
+            document.getElementById('modalImg').src = url;
+            document.getElementById('imageModal').classList.add('active');
+        }
+        function closeModal() {
+            document.getElementById('imageModal').classList.remove('active');
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+
+</body>
+</html>

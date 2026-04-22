@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #fff5f8; }
+
+        nav { background: white; padding: 16px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #fce7f3; }
+        nav h1 { color: #f472b6; font-size: 22px; }
+        nav a { color: #f472b6; text-decoration: none; font-size: 14px; margin-left: 20px; }
+
+        .container { max-width: 600px; margin: 40px auto; padding: 0 24px; }
+        h2 { color: #f472b6; margin-bottom: 24px; font-size: 20px; }
+
+        .form-card { background: white; padding: 32px; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+
+        label { display: block; font-size: 13px; color: #888; margin-bottom: 4px; margin-top: 16px; }
+        input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #fce7f3; border-radius: 6px; font-size: 14px; color: #444; background: white; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #f9a8d4; }
+        textarea { height: 80px; resize: vertical; }
+
+        .btn-row { display: flex; gap: 12px; margin-top: 24px; }
+        .save-btn { background: #f9a8d4; color: white; border: none; padding: 10px 28px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+        .save-btn:hover { background: #f472b6; }
+        .cancel-btn { color: #f472b6; text-decoration: none; padding: 10px 16px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <h1>👜 Loved and Listed</h1>
+        <div style="display: flex; align-items: center;">
+            <a href="{% url 'home' %}">Browse</a>
+            <a href="{% url 'closet' %}">My Closet</a>
+            <a href="{% url 'public_profile' request.user.username %}">My Shop</a>
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+            <div style="position: relative; margin-left: 20px;" id="profileMenu">
+                <button onclick="toggleMenu()" style="background: #fce7f3; border: none; color: #f472b6; font-size: 14px; cursor: pointer; padding: 6px 14px; border-radius: 99px;">
+                    👤 Profile ▾
+                </button>
+                <div id="dropdown" style="display: none; position: absolute; right: 0; top: 36px; background: white; border: 1px solid #fce7f3; border-radius: 10px; min-width: 160px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 100;">
+                    <a href="{% url 'edit_profile' %}" style="display: block; padding: 10px 16px; font-size: 14px; color: #f472b6; text-decoration: none;">✏️ Edit Profile</a>
+                    <div style="border-top: 1px solid #fce7f3;"></div>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" style="width: 100%; text-align: left; background: none; border: none; padding: 10px 16px; font-size: 14px; color: #f472b6; cursor: pointer;">🚪 Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+<script>
+    function toggleMenu() {
+        const dropdown = document.getElementById('dropdown');
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+    }
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('profileMenu');
+        if (!menu.contains(e.target)) {
+            document.getElementById('dropdown').style.display = 'none';
+        }
+    });
+</script>
+
+    <div class="container">
+        <h2>{{ title }}</h2>
+        <div class="form-card">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% for field in form %}
+                    <label>{{ field.label }}</label>
+                    {% if field.field.widget.input_type == 'date' %}
+                        <input type="date" name="{{ field.html_name }}" 
+                               value="{{ field.value|date:'Y-m-d' }}"
+                               style="width:100%; padding:10px 12px; border:1px solid #fce7f3; border-radius:6px; font-size:14px; color:#444;">
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+                    {% if field.errors %}
+                        <p style="color: red; font-size: 12px;">{{ field.errors }}</p>
+                    {% endif %}
+                {% endfor %}
+                <div class="btn-row">
+                    <button type="submit" class="save-btn">Save</button>
+                    <a href="{% url 'home' %}" class="cancel-btn">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

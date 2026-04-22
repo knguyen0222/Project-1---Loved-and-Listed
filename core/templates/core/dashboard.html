@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Money Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #fff5f8; }
+
+        nav { background: white; padding: 16px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #fce7f3; }
+        nav h1 { color: #f472b6; font-size: 22px; }
+        nav a { color: #f472b6; text-decoration: none; font-size: 14px; margin-left: 20px; }
+        nav a.active { color: #db2777; font-weight: 500; border-bottom: 2px solid #f472b6; padding-bottom: 2px; }
+
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 24px; }
+        h2 { color: #f472b6; font-size: 20px; margin-bottom: 24px; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 40px; }
+
+        .card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+        .card .label { font-size: 13px; color: #aaa; margin-bottom: 8px; }
+        .card .value { font-size: 28px; font-weight: 500; color: #f472b6; }
+        .card .sub { font-size: 13px; color: #aaa; margin-top: 4px; }
+
+        .highlight-card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 16px; }
+        .highlight-card .label { font-size: 13px; color: #aaa; margin-bottom: 8px; }
+        .highlight-card .item-name { font-size: 18px; font-weight: 500; color: #444; }
+        .highlight-card .item-meta { font-size: 13px; color: #aaa; margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <h1>👜 Loved & Listed</h1>
+        <div style="display: flex; align-items: center;">
+            <a href="{% url 'home' %}">Browse</a>
+            <a href="{% url 'closet' %}">My Closet</a>
+            <a href="{% url 'public_profile' request.user.username %}">My Shop</a>
+            <a href="{% url 'dashboard' %}" class="active">Dashboard</a>
+            <div style="position: relative; margin-left: 20px;" id="profileMenu">
+                <button onclick="toggleMenu()" style="background: #fce7f3; border: none; color: #f472b6; font-size: 14px; cursor: pointer; padding: 6px 14px; border-radius: 99px;">
+                    👤 Profile ▾
+                </button>
+                <div id="dropdown" style="display: none; position: absolute; right: 0; top: 36px; background: white; border: 1px solid #fce7f3; border-radius: 10px; min-width: 160px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 100;">
+                    <a href="{% url 'edit_profile' %}" style="display: block; padding: 10px 16px; font-size: 14px; color: #f472b6; text-decoration: none;">✏️ Edit Profile</a>
+                    <div style="border-top: 1px solid #fce7f3;"></div>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" style="width: 100%; text-align: left; background: none; border: none; padding: 10px 16px; font-size: 14px; color: #f472b6; cursor: pointer;">🚪 Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        function toggleMenu() {
+            const dropdown = document.getElementById('dropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('profileMenu');
+            if (menu && !menu.contains(e.target)) {
+                document.getElementById('dropdown').style.display = 'none';
+            }
+        });
+    </script>
+
+    <div class="container">
+        <h2>💰 Dashboard</h2>
+
+        <div class="grid">
+            <div class="card">
+                <div class="label">Total spent</div>
+                <div class="value">${{ total_spent|floatformat:2 }}</div>
+                <div class="sub">across all items</div>
+            </div>
+            <div class="card">
+                <div class="label">Total earned</div>
+                <div class="value">${{ total_earned|floatformat:2 }}</div>
+                <div class="sub">from sold items</div>
+            </div>
+            <div class="card">
+                <div class="label">Currently listed</div>
+                <div class="value">${{ total_listing_value|floatformat:2 }}</div>
+                <div class="sub">{{ items_listed }} item(s) for sale</div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <div class="label">Items keeping</div>
+                <div class="value">{{ items_keeping }}</div>
+            </div>
+            <div class="card">
+                <div class="label">Items listed</div>
+                <div class="value">{{ items_listed }}</div>
+            </div>
+            <div class="card">
+                <div class="label">Items sold</div>
+                <div class="value">{{ items_sold }}</div>
+            </div>
+            <div class="card">
+                <div class="label">Total items</div>
+                <div class="value">{{ items_keeping|add:items_listed|add:items_sold }}</div>
+            </div>
+        </div>
+
+        {% if most_expensive %}
+        <h2>✨ Most Expensive Item</h2>
+        <div class="highlight-card">
+            <div class="label">Priciest thing you own</div>
+            <div class="item-name">{{ most_expensive.item_name }}</div>
+            <div class="item-meta">{{ most_expensive.brand }} · {{ most_expensive.category }} · ${{ most_expensive.purchase_price }}</div>
+        </div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>
