@@ -24,7 +24,7 @@ def add_item(request):
             item = form.save(commit=False)
             item.owner = request.user
             item.save()
-            return redirect('home')
+            return redirect('closet')
     else:
         form = ItemForm()
     return render(request, 'core/item_form.html', {'form': form, 'title': 'Add Item'})
@@ -36,7 +36,7 @@ def edit_item(request, pk):
         form = ItemForm(request.POST, request.FILES, instance=item)
         if form.is_valid():
             form.save()
-            return redirect('home')
+            return redirect('closet')
     else:
         form = ItemForm(instance=item)
     return render(request, 'core/item_form.html', {'form': form, 'title': 'Edit Item'})
@@ -46,7 +46,7 @@ def delete_item(request, pk):
     item = get_object_or_404(Item, pk=pk, owner=request.user)
     if request.method == 'POST':
         item.delete()
-        return redirect('home')
+        return redirect('closet')
     return render(request, 'core/confirm_delete.html', {'item': item})
 
 @login_required
