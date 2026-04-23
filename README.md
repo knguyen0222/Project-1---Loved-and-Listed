@@ -6,7 +6,7 @@ A full-stack personal inventory and resale web app built with Django and Postgre
 https://project-1-loved-and-listed-production.up.railway.app
 
 ## About
-Loved & Listed is a personal wardrobe and inventory tracker with built-in resale features. Users can manage everything they own, list items for sale, track profits, and browse other users' shops — all in one place.
+Loved & Listed is a personal wardrobe and inventory tracker with built-in resale features. Users can manage everything they own, list items for sale, track profits, and browse other users' shops.
 
 ## Features
 - Browse public listings without an account
